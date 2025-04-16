@@ -1,0 +1,15 @@
+# Ignorar node_modules
+node_modules/
+
+# Ignorar arquivos de log
+*.log
+
+# Ignorar arquivos do sistema operacional (ex: arquivos temporários no macOS ou Windows)
+.DS_Store
+Thumbs.db
+
+# Ignorar pasta de build (se tiver)
+build/
+
+# Ignorar o arquivo .env com variáveis sensíveis (não coloque no repositório)
+.env
