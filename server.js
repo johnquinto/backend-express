@@ -27,28 +27,28 @@ mongoose.connect(process.env.MONGO_URI)
   });
 
 // Importar e usar as rotas
-const authRoutes = require('./routes/auth');
+const authRoutes = require('./src/routes/auth');
 app.use('/api/auth', authRoutes);
 
-const teamRoutes = require('./routes/team');
+const teamRoutes = require('./src/routes/team');
 app.use('/api/teams', teamRoutes);
 
-const projectsRoutes = require('./routes/projects');
+const projectsRoutes = require('./src/routes/projects');
 app.use('/api/projects', projectsRoutes);
 
-const userRoutes = require('./routes/userRoutes');
+const userRoutes = require('./src/routes/userRoutes');
 app.use('/api/users', userRoutes);
 
-const test = require('./routes/test');
+const test = require('./src/routes/test');
 app.use('/api/tests', test);
 
-const taskRoutes = require('./routes/taskRoutes');
+const taskRoutes = require('./src/routes/taskRoutes');
 app.use('/api/tasks', taskRoutes);
 
-const linksRoutes = require('./routes/linksRoutes');
+const linksRoutes = require('./src/routes/linksRoutes');
 app.use('/api/links', linksRoutes);
 
-const commentRoutes = require('./routes/commentRoutes');
+const commentRoutes = require('./src/routes/commentRoutes');
 app.use('/api/comments', commentRoutes);
 
 // Rota padrão para verificar o funcionamento do backend
@@ -57,7 +57,7 @@ app.get('/', (req, res) => {
 });
 
 // Configuração do Socket.io
-require('./socket')(io); // Importa a configuração do socket do arquivo socket.js
+require('./src/socket')(io); // Importa a configuração do socket do arquivo socket.js
 
 // Iniciar servidor
 const PORT = process.env.PORT || 5000;
