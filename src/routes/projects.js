@@ -59,8 +59,8 @@ router.post("/", async (req, res) => {
       name,
       description,
       documents,
-      startDate: start.format('YYYY-MM-DD'),
-      dueDate: due.format('YYYY-MM-DD'),
+      startDate,
+      dueDate,
       members,
       teamId,
       permissions,
@@ -212,19 +212,16 @@ router.put("/:id", async (req, res) => {
       return res.status(404).json({ message: "Projeto não encontrado" });
     }
 
-    // Verifica formato da nova dueDate (se foi enviada)
-    if (dueDate && !dayjs(dueDate).isValid()) {
-      return res.status(400).json({ message: "Formato de data inválido" });
-    }
-
-    // Se dueDate está presente, verificar conflitos com tarefas
+    // Se `dueDate` estiver presente na requisição, validar com as tarefas associadas
     if (dueDate) {
       const tasks = await Task.find({ project: req.params.id });
-      const newDue = dayjs(dueDate);
 
-      const isInvalidDueDate = tasks.some((task) =>
-        dayjs(task.dueDate).isAfter(newDue)
-      );
+      // Verificar se alguma tarefa tem uma dueDate maior que a nova dueDate do projeto
+      const isInvalidDueDate = tasks.some((task) => {
+        const taskDueDate = new Date(task.dueDate); // Converte a dueDate da tarefa para um objeto Date
+        const newProjectDueDate = new Date(dueDate); // Converte a nova dueDate para um objeto Date
+        return taskDueDate > newProjectDueDate; // Verifica se a data da tarefa é maior
+      });
 
       if (isInvalidDueDate) {
         return res.status(400).json({
@@ -234,10 +231,14 @@ router.put("/:id", async (req, res) => {
       }
     }
 
+    // Variáveis para armazenar as mensagens de atividade
     let activityMessages = [];
 
+    // Comparando os valores antigos com os novos e gerando mensagens de atividade
     if (name && project.name !== name) {
-      activityMessages.push(`Atualizou o nome do projeto de "${project.name}" para "${name}"`);
+      activityMessages.push(
+        `Atualizou o nome do projeto de "${project.name}" para "${name}"`
+      );
     }
 
     if (description && project.description !== description) {
@@ -249,17 +250,18 @@ router.put("/:id", async (req, res) => {
     }
 
     if (dueDate) {
-      const oldDate = dayjs(project.dueDate).format("YYYY-MM-DD");
-      const newDate = dayjs(dueDate).format("YYYY-MM-DD");
-      if (oldDate !== newDate) {
+      const oldDueDate = new Date(project.dueDate).toISOString().split("T")[0]; // Formato "YYYY-MM-DD"
+      const newDueDate = new Date(dueDate).toISOString().split("T")[0];
+      if (oldDueDate !== newDueDate) {
         activityMessages.push(`Atualizou a data de conclusão do projeto`);
       }
     }
 
-    if (members && !_.isEqual(project.members, members)) {
+    if (JSON.stringify(project.members) !== JSON.stringify(members)) {
       activityMessages.push(`Atualizou os membros do projeto`);
     }
 
+    // Registrar as mensagens de atividade
     if (activityMessages.length > 0) {
       await logActivity(
         userName,
@@ -269,19 +271,10 @@ router.put("/:id", async (req, res) => {
       );
     }
 
-    // Construindo campos atualizáveis de forma segura
-    const updateFields = {};
-    if (name) updateFields.name = name;
-    if (description) updateFields.description = description;
-    if (status) updateFields.status = status;
-    if (permissions) updateFields.permissions = permissions;
-    if (members) updateFields.members = members;
-    if (dueDate) updateFields.dueDate = dueDate;
-    if (documents) updateFields.documents = documents;
-
+    // Atualiza o projeto com os novos dados
     const updatedProject = await Project.findByIdAndUpdate(
       req.params.id,
-      updateFields,
+      { name, description, status, permissions, members, dueDate, documents },
       { new: true }
     );
 
