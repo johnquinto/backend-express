@@ -29,6 +29,7 @@ router.post("/", async (req, res) => {
     area,
   } = req.body;
 
+  // Verificação dos campos obrigatórios
   if (
     !name ||
     !description ||
@@ -42,16 +43,19 @@ router.post("/", async (req, res) => {
   }
 
   try {
-    // Validar formato das datas
-    const start = dayjs(startDate);
-    const due = dayjs(dueDate);
+    // // Buscar a data atual na API
+    // const response = await fetch('https://timeapi.io/api/Time/current/zone?timeZone=Africa/Luanda');
+    // const data = await response.json();
+    // const currentDate = dayjs(data.date); // Formatar a data atual no formato do dayjs
 
-    if (!start.isValid() || !due.isValid()) {
-      return res.status(400).json({ message: "Datas inválidas." });
-    }
+    // Verificar se o startDate é igual à data atual
+    // if (!startDate || !dayjs(startDate).isSame(currentDate, 'day')) {
+    //   return res.status(400).json({ message: "A data de início deve ser a data atual." });
+    // }
 
-    if (due.isBefore(start, 'day')) {
-      return res.status(400).json({ message: "A data de término deve ser depois da data de início." });
+    // Verificar se o dueDate é maior ou igual ao startDate
+    if (dayjs(dueDate).isBefore(startDate, 'day')) {
+      return res.status(400).json({ message: "A data de término deve ser maior ou igual à data de início." });
     }
 
     // Cria um novo projeto com as informações fornecidas
@@ -59,15 +63,18 @@ router.post("/", async (req, res) => {
       name,
       description,
       documents,
-      startDate,
+      startDate, // Garantir que a startDate seja a data atual
+      // startDate,
       dueDate,
-      members,
-      teamId,
+      members, // IDs dos membros do projeto
+      teamId, // ID da equipe
       permissions,
       area,
     });
 
     await project.save();
+
+    // Registrar a atividade de criação de projeto
     await logActivity(userName, `Criou o projeto "${name}"`, project._id, teamId);
 
     res.status(201).json({ message: "Projeto criado com sucesso!", project });
