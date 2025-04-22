@@ -222,7 +222,7 @@ router.put("/:id", async (req, res) => {
     const newProjectDueDate = new Date(dueDate);
     const oldProjectStartDate = new Date(project.startDate)
     
-    if (newProjectDueDate > oldProjectStartDate) {
+    if (newProjectDueDate < oldProjectStartDate) {
       return res.status(400).json({ message: "A data de término deve ser maior ou igual à data de início." });
     }
 
