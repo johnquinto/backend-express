@@ -3,7 +3,7 @@ const http = require('http');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const { Server } = require('socket.io');
-const axios = require('axios'); // <- adicionado
+const axios = require('axios'); // <- usado pra ping
 
 require('dotenv').config();
 
@@ -53,7 +53,7 @@ app.use('/api/links', linksRoutes);
 const commentRoutes = require('./src/routes/commentRoutes');
 app.use('/api/comments', commentRoutes);
 
-// Rota padrão para verificar o funcionamento do backend
+// Rota padrão
 app.get('/', (req, res) => {
   res.send('Backend rodando');
 });
@@ -61,7 +61,7 @@ app.get('/', (req, res) => {
 // Configuração do Socket.io
 require('./src/socket')(io);
 
-// Pingar o frontend periodicamente pra mantê-lo acordado
+// Pingar o frontend periodicamente
 const FRONTEND_URL = 'https://frontend-react-w8wb.onrender.com';
 
 setInterval(async () => {
@@ -70,6 +70,18 @@ setInterval(async () => {
     console.log(`[PING] Frontend acordado: ${res.status} - ${new Date().toISOString()}`);
   } catch (err) {
     console.log(`[PING] Erro ao pingar frontend: ${err.message}`);
+  }
+}, 1000 * 60 * 5); // a cada 5 minutos
+
+// Pingar o App B periodicamente
+const APP_B_URL = 'https://app-b-pinger.onrender.com';
+
+setInterval(async () => {
+  try {
+    const res = await axios.get(APP_B_URL);
+    console.log(`[PING] App B acordado: ${res.status} - ${new Date().toISOString()}`);
+  } catch (err) {
+    console.log(`[PING] Erro ao pingar App B: ${err.message}`);
   }
 }, 1000 * 60 * 5); // a cada 5 minutos
 
