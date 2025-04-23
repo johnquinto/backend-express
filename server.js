@@ -2,14 +2,16 @@ const express = require('express');
 const http = require('http');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const { Server } = require('socket.io'); // Importa o servidor socket.io
+const { Server } = require('socket.io');
+const axios = require('axios'); // <- adicionado
+
 require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: '*', // Define origens permitidas (para produção, use uma origem específica)
+    origin: '*',
   },
 });
 
@@ -57,9 +59,20 @@ app.get('/', (req, res) => {
 });
 
 // Configuração do Socket.io
-require('./src/socket')(io); // Importa a configuração do socket do arquivo socket.js
+require('./src/socket')(io);
+
+// Pingar o frontend periodicamente pra mantê-lo acordado
+const FRONTEND_URL = 'https://frontend-react-w8wb.onrender.com';
+
+setInterval(async () => {
+  try {
+    const res = await axios.get(FRONTEND_URL);
+    console.log(`[PING] Frontend acordado: ${res.status} - ${new Date().toISOString()}`);
+  } catch (err) {
+    console.log(`[PING] Erro ao pingar frontend: ${err.message}`);
+  }
+}, 1000 * 60 * 5); // a cada 5 minutos
 
 // Iniciar servidor
 const PORT = process.env.PORT || 5000;
-
 server.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
