@@ -62,7 +62,7 @@ app.get('/', (req, res) => {
 require('./src/socket')(io);
 
 // Pingar o frontend periodicamente
-const FRONTEND_URL = 'https://frontend-react-w8wb.onrender.com';
+const FRONTEND_URL = 'https://frontend-react-mxin.onrender.com';
 
 setInterval(async () => {
   try {
@@ -74,7 +74,7 @@ setInterval(async () => {
 }, 1000 * 60 * 5); // a cada 5 minutos
 
 // Pingar o App B periodicamente
-const APP_B_URL = 'https://app-b-pinger.onrender.com';
+const APP_B_URL = 'https://app-b-pinger-ljzb.onrender.com';
 
 setInterval(async () => {
   try {
